@@ -1,11 +1,12 @@
-# Minecraft Pyramid Limit Plugin
+# Minecraft Pyramid Counter Plugin
 
-The Minecraft Pyramid Limit plugin is designed to enforce specific limitations on player interactions within a designated pyramid area in the game. It serves as a mini-game script to control player actions and ensure fair gameplay.
+The Minecraft Pyramid Counter plugin is designed to enforce specific limitations on player interactions within a designated pyramid area in the game. It serves as a mini-game script to control player actions and ensure fair gameplay.
 
 ## Features
 
 - **Daily Run Limit**: Players are restricted from running the pyramid mini-game more than a specified number of times per day.
 - **Daily Item Limit**: Players can only pick up a limited number of items from the pyramid mini-game area each day.
+- **Item Pickup Cooldown**: Players can only pick up a limited number of items within a specific cooldown period to prevent excessive item gathering.
 - **Boundary Checking**: The plugin ensures that player interactions occur within the defined boundaries of the pyramid area.
 - **Automatic Reset**: Limits reset automatically at midnight, allowing players to engage in the mini-game again.
 
@@ -17,7 +18,7 @@ The Minecraft Pyramid Limit plugin is designed to enforce specific limitations o
 ## Configuration
 
 - Customize the boundaries of the pyramid area by adjusting the coordinates in the plugin code.
-- Modify the maximum daily run and item limits as needed.
+- Modify the maximum daily run, item limits, and cooldown period as needed.
 
 ## Usage
 
