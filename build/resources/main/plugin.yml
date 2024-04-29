@@ -1,0 +1,4 @@
+name: pyramid_run_counter
+version: '1.0-SNAPSHOT'
+main: io.github.rebeloipl.pyramidcounter.Pyramid_counter
+api-version: '1.20'
