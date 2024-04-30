@@ -1,0 +1,10 @@
+pyramids:
+  pyramid1:
+    minX: 7800
+    maxX: 7860
+    minY: 32
+    maxY: 128
+    minZ: -7730
+    maxZ: -7780
+
+# Add more pyramids as needed...

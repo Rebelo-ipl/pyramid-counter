@@ -1,3 +1,4 @@
+// PyramidCounter.java
 package io.github.rebeloipl.pyramidcounter;
 
 import org.bukkit.Location;
@@ -10,8 +11,16 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+import java.util.ArrayList;
 
 public final class Pyramid_counter extends JavaPlugin implements Listener {
 
@@ -19,22 +28,19 @@ public final class Pyramid_counter extends JavaPlugin implements Listener {
     private Map<UUID, LocalDateTime> lastRunDates = new HashMap<>();
     private Map<UUID, Integer> itemsPickedUpToday = new HashMap<>();
     private Map<UUID, LocalDateTime> lastItemPickupTimes = new HashMap<>();
+    private List<PyramidArea> pyramidAreas;
 
     private final int maxRunsPerDay = 10;
     private final int maxItemsPerDay = 10;
     private final int maxItemsPerPeriod = 3; // Maximum items per cooldown period
     private final Duration cooldownPeriod = Duration.ofMinutes(10); // 10 minutes cooldown period
 
-    private int pyramidMinX = 7800;
-    private int pyramidMaxX = 7860;
-    private int pyramidMinY = 32;
-    private int pyramidMaxY = 128;
-    private int pyramidMinZ = -7730;
-    private int pyramidMaxZ = -7780;
-
     @Override
     public void onEnable() {
         getLogger().info("Minecraft Pyramid Limit script enabled!");
+
+        // Load pyramid areas from configuration file
+        loadPyramidAreas();
 
         // Register event listeners
         getServer().getPluginManager().registerEvents(this, this);
@@ -83,14 +89,13 @@ public final class Pyramid_counter extends JavaPlugin implements Listener {
     }
 
     private boolean isChestInMiniGameArea(Location location) {
-        // Check if the clicked block is within the boundaries of the pyramid area
-        int blockX = location.getBlockX();
-        int blockY = location.getBlockY();
-        int blockZ = location.getBlockZ();
-
-        return blockX >= pyramidMinX && blockX <= pyramidMaxX &&
-                blockY >= pyramidMinY && blockY <= pyramidMaxY &&
-                blockZ >= pyramidMinZ && blockZ <= pyramidMaxZ;
+        // Check if the clicked block is within the boundaries of any pyramid area
+        for (PyramidArea area : pyramidAreas) {
+            if (area.isInArea(location)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasExceededDailyLimit(Player player) {
@@ -147,5 +152,66 @@ public final class Pyramid_counter extends JavaPlugin implements Listener {
     private void updateLastItemPickupTime(Player player) {
         UUID playerId = player.getUniqueId();
         lastItemPickupTimes.put(playerId, LocalDateTime.now());
+    }
+
+    private void loadPyramidAreas() {
+        // Get the configuration file
+        File configFile = new File(getDataFolder(), "pyramids.yml");
+        if (!configFile.exists()) {
+            getLogger().warning("pyramids.yml configuration file not found!");
+            return;
+        }
+
+        // Load the configuration from the file
+        FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+
+        // Read pyramid areas from the configuration
+        if (config.isConfigurationSection("pyramids")) {
+            ConfigurationSection pyramidsSection = config.getConfigurationSection("pyramids");
+            pyramidAreas = new ArrayList<>();
+
+            for (String key : pyramidsSection.getKeys(false)) {
+                ConfigurationSection pyramidSection = pyramidsSection.getConfigurationSection(key);
+                if (pyramidSection != null) {
+                    int minX = pyramidSection.getInt("minX");
+                    int maxX = pyramidSection.getInt("maxX");
+                    int minY = pyramidSection.getInt("minY");
+                    int maxY = pyramidSection.getInt("maxY");
+                    int minZ = pyramidSection.getInt("minZ");
+                    int maxZ = pyramidSection.getInt("maxZ");
+
+                    PyramidArea area = new PyramidArea(minX, maxX, minY, maxY, minZ, maxZ);
+                    pyramidAreas.add(area);
+                }
+            }
+        }
+    }
+}
+
+class PyramidArea {
+    private final int minX;
+    private final int maxX;
+    private final int minY;
+    private final int maxY;
+    private final int minZ;
+    private final int maxZ;
+
+    public PyramidArea(int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {
+        this.minX = minX;
+        this.maxX = maxX;
+        this.minY = minY;
+        this.maxY = maxY;
+        this.minZ = minZ;
+        this.maxZ = maxZ;
+    }
+
+    public boolean isInArea(Location location) {
+        int blockX = location.getBlockX();
+        int blockY = location.getBlockY();
+        int blockZ = location.getBlockZ();
+
+        return blockX >= minX && blockX <= maxX &&
+                blockY >= minY && blockY <= maxY &&
+                blockZ >= minZ && blockZ <= maxZ;
     }
 }
